@@ -1,25 +1,45 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import SearchBar from "./components/Searchbar";
+import youtube from "./apis/youtube";
+import VideoList from "./components/VideoList";
+import VideoDetail from "./components/VideoDetail";
 
-function App() {
+const App = () => {
+  const [state, setState] = useState({ videos: [], selectedVideo: null });
+
+  const handleSubmit = async (termFromSearchBar) => {
+    const response = await youtube.get("/search", {
+      params: {
+        q: termFromSearchBar,
+      },
+    });
+    setState({
+      ...state,
+      videos: response.data.items,
+    });
+  };
+
+  const handleVideoSelect = (video) => {
+    setState({ ...state, selectedVideo: video });
+  };
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="ui container" style={{ marginTop: "1em" }}>
+      <SearchBar handleFormSubmit={handleSubmit} />
+      <div className="ui grid">
+        <div className="ui row">
+          <div className="eleven wide column">
+            <VideoDetail video={state.selectedVideo} />
+          </div>
+          <div className="five wide column">
+            <VideoList
+              handleVideoSelect={handleVideoSelect}
+              videos={state.videos}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
-}
+};
 
 export default App;
